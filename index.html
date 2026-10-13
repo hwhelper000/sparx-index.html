@@ -20,6 +20,8 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     body {
@@ -96,7 +98,7 @@
       box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
     }
 
-    /* Content Area - No boxes, no padding, raw edge-to-edge */
+    /* Content Area */
     .content-area {
       width: 100vw;
       min-height: 100vh;
@@ -111,17 +113,26 @@
       display: block;
     }
 
-    /* Raw Full Video & Image */
+    /* Raw Full Video & Image (Pointer events disabled to prevent pause/right-click) */
     .raw-media {
       width: 100vw;
       min-height: 100vh;
       display: block;
       object-fit: contain;
       background: #000000;
+      pointer-events: none; /* Prevents clicking or pausing the video */
+    }
+
+    /* Hide any browser-specific media controls completely */
+    video::-webkit-media-controls {
+      display: none !important;
+    }
+    video::-webkit-media-controls-enclosure {
+      display: none !important;
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
   <!-- Top Floating Nav -->
   <div class="nav-wrapper">
@@ -137,11 +148,10 @@
 
   <!-- Raw Media View -->
   <div class="content-area">
-    <!-- TikTok Video Tab -->
+    <!-- TikTok Video Tab (Unpausable, seamless loop) -->
     <div class="view-panel active" id="view-tiktok">
-      <video class="raw-media" autoplay loop muted playsinline controls>
+      <video id="tiktok-vid" class="raw-media" autoplay loop muted playsinline disablePictureInPicture>
         <source src="tiktok%20preview.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
       </video>
     </div>
 
@@ -152,6 +162,15 @@
   </div>
 
   <script>
+    const tiktokVid = document.getElementById('tiktok-vid');
+
+    // Ensure video always plays and never pauses
+    window.addEventListener('DOMContentLoaded', () => {
+      if (tiktokVid) {
+        tiktokVid.play().catch(() => {});
+      }
+    });
+
     function switchTab(tabName) {
       const btnTiktok = document.getElementById('btn-tiktok');
       const btnGta = document.getElementById('btn-gta');
@@ -163,6 +182,7 @@
         btnGta.classList.remove('active');
         viewTiktok.classList.add('active');
         viewGta.classList.remove('active');
+        tiktokVid.play().catch(() => {});
       } else {
         btnGta.classList.add('active');
         btnTiktok.classList.remove('active');
